@@ -1,0 +1,89 @@
+[gd_scene load_steps=3 format=3 uid="uid://bdkcharselect"]
+
+[ext_resource type="Script" path="res://scenes/ui/character_selector.gd" id="1_sel"]
+[ext_resource type="Texture2D" path="res://art/background.png" id="2_bg"]
+
+[node name="CharacterSelector" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_sel")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.55)
+
+[node name="Box" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -90.0
+offset_top = -46.0
+offset_right = 90.0
+offset_bottom = 46.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 5
+alignment = 1
+
+[node name="Title" type="Label" parent="Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.980392, 0.850980, 0.450980, 1)
+theme_override_font_sizes/font_size = 12
+text = "选择角色"
+horizontal_alignment = 1
+
+[node name="Choices" type="HBoxContainer" parent="Box"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Warrior" type="Button" parent="Box/Choices"]
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 12
+text = "战士"
+
+[node name="Hunter" type="Button" parent="Box/Choices"]
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 12
+text = "猎手"
+
+[node name="Info" type="Label" parent="Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.901961, 0.890196, 0.862745, 1)
+theme_override_font_sizes/font_size = 12
+text = ""
+horizontal_alignment = 1
+
+[node name="Go" type="Button" parent="Box"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 12
+text = "出发"

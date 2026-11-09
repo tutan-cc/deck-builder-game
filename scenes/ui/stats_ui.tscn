@@ -1,0 +1,45 @@
+[gd_scene load_steps=2 format=3 uid="uid://bdkstatsui001"]
+
+[ext_resource type="Script" path="res://scenes/ui/stats_ui.gd" id="1_statsui"]
+
+[node name="StatsUI" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 16.0
+mouse_filter = 2
+script = ExtResource("1_statsui")
+
+[node name="Health" type="Label" parent="."]
+layout_mode = 0
+offset_left = 2.0
+offset_right = 28.0
+offset_bottom = 12.0
+theme_override_colors/font_color = Color(1, 0.929412, 0.929412, 1)
+theme_override_colors/font_outline_color = Color(0.121569, 0.0705882, 0.0705882, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 12
+text = "10"
+
+[node name="Block" type="Label" parent="."]
+layout_mode = 0
+offset_left = 26.0
+offset_right = 48.0
+offset_bottom = 12.0
+theme_override_colors/font_color = Color(0.603922, 0.819608, 1, 1)
+theme_override_colors/font_outline_color = Color(0.0705882, 0.117647, 0.2, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 12
+text = "0"
+[node name="Statuses" type="Label" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 12.0
+offset_right = 56.0
+offset_bottom = 22.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.960784, 0.760784, 0.470588, 1)
+theme_override_colors/font_outline_color = Color(0.0705882, 0.0588235, 0.0588235, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 12
+text = ""

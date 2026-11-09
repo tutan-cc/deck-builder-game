@@ -1,0 +1,99 @@
+[gd_scene load_steps=4 format=3 uid="uid://bdkrun0001"]
+
+[ext_resource type="Script" path="res://scenes/run/run.gd" id="1_run"]
+[ext_resource type="Texture2D" path="res://art/background.png" id="2_bg"]
+[ext_resource type="PackedScene" path="res://scenes/ui/card_menu.tscn" id="3_cards"]
+
+[node name="Run" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_run")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.45)
+
+[node name="Box" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -86.0
+offset_top = -48.0
+offset_right = 86.0
+offset_bottom = 48.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 5
+alignment = 1
+
+[node name="Title" type="Label" parent="Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.980392, 0.850980, 0.450980, 1)
+theme_override_font_sizes/font_size = 12
+text = "第 1 层"
+horizontal_alignment = 1
+
+[node name="Character" type="Label" parent="Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.941176, 0.933333, 0.909804, 1)
+theme_override_font_sizes/font_size = 12
+text = "战士"
+horizontal_alignment = 1
+
+[node name="Depth" type="Label" parent="Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.941176, 0.933333, 0.909804, 1)
+theme_override_font_sizes/font_size = 12
+text = "第 1 层"
+horizontal_alignment = 1
+
+[node name="Relics" type="Label" parent="Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.850980, 0.780392, 0.560784, 1)
+theme_override_font_sizes/font_size = 12
+text = "遗物：无"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="Box"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Deck" type="Button" parent="Box/Buttons"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "卡组"
+
+[node name="Enter" type="Button" parent="Box/Buttons"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "进入战斗"
+
+[node name="CardMenu" parent="." instance=ExtResource("3_cards")]

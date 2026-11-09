@@ -1,0 +1,25 @@
+[gd_scene load_steps=6 format=3 uid="uid://bdkenemy0001"]
+
+[ext_resource type="Script" path="res://scenes/enemy/enemy.gd" id="1_enemy"]
+[ext_resource type="PackedScene" path="res://scenes/ui/stats_ui.tscn" id="2_statsui"]
+[ext_resource type="Texture2D" path="res://art/tile_0108.png" id="3_icon"]
+[ext_resource type="PackedScene" path="res://scenes/ui/intent_ui.tscn" id="4_intent"]
+[ext_resource type="Texture2D" path="res://art/arrow.png" id="5_arrow"]
+
+[node name="Enemy" type="Node2D" groups=["enemies"]]
+script = ExtResource("1_enemy")
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("3_icon")
+
+[node name="StatsUI" parent="." instance=ExtResource("2_statsui")]
+offset_left = -14.0
+offset_top = -20.0
+offset_right = 26.0
+offset_bottom = -4.0
+
+[node name="IntentUI" parent="." instance=ExtResource("4_intent")]
+offset_left = -12.0
+offset_top = -34.0
+offset_right = 12.0
+offset_bottom = -22.0

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bdkstatustest"]
+
+[ext_resource type="Script" path="res://tools/status_test.gd" id="1_status"]
+
+[node name="StatusTest" type="Node"]
+script = ExtResource("1_status")

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bdkpopuptest"]
+
+[ext_resource type="Script" path="res://tools/popup_test.gd" id="1_popup"]
+
+[node name="PopupTest" type="Node"]
+script = ExtResource("1_popup")

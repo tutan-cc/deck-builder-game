@@ -1,0 +1,148 @@
+[gd_scene load_steps=12 format=3 uid="uid://cq1u2y3battle1"]
+
+[ext_resource type="Script" path="res://scenes/battle/battle.gd" id="1_battle"]
+[ext_resource type="Texture2D" path="res://art/background.png" id="2_bg"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hand.tscn" id="3_hand"]
+[ext_resource type="PackedScene" path="res://scenes/enemy/enemy.tscn" id="4_enemy"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="5_player"]
+[ext_resource type="PackedScene" path="res://scenes/card_target_selector/card_target_selector.tscn" id="6_selector"]
+[ext_resource type="Script" path="res://scenes/player/player_handler.gd" id="7_handler"]
+[ext_resource type="PackedScene" path="res://scenes/ui/card_pile_view.tscn" id="8_pileview"]
+[ext_resource type="PackedScene" path="res://scenes/ui/card_tooltip.tscn" id="9_tooltip"]
+[ext_resource type="PackedScene" path="res://scenes/ui/battle_over_panel.tscn" id="10_over"]
+[ext_resource type="PackedScene" path="res://scenes/ui/top_bar.tscn" id="11_bar"]
+[ext_resource type="PackedScene" path="res://scenes/ui/card_rewards.tscn" id="12_rewards"]
+
+[sub_resource type="StyleBoxFlat" id="sb_help"]
+bg_color = Color(0.11, 0.09, 0.09, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.72, 0.58, 0.32, 1)
+content_margin_left = 6.0
+content_margin_top = 4.0
+content_margin_right = 6.0
+content_margin_bottom = 4.0
+
+[node name="Battle" type="Node2D"]
+script = ExtResource("1_battle")
+
+[node name="Background" type="Sprite2D" parent="."]
+texture = ExtResource("2_bg")
+centered = false
+
+[node name="Player" parent="." instance=ExtResource("5_player")]
+position = Vector2(26, 76)
+
+[node name="PlayerHandler" type="Node" parent="."]
+script = ExtResource("7_handler")
+
+[node name="EnemyHandler" type="Node2D" parent="."]
+
+
+[node name="UILayer" type="CanvasLayer" parent="." groups=["ui_layer"]]
+
+[node name="PlayZone" type="Control" parent="UILayer" groups=["play_zone"]]
+layout_mode = 3
+anchors_preset = 0
+offset_top = 22.0
+offset_right = 256.0
+offset_bottom = 80.0
+mouse_filter = 2
+
+[node name="Hand" parent="UILayer" instance=ExtResource("3_hand")]
+
+[node name="CardTargetSelector" parent="UILayer" instance=ExtResource("6_selector")]
+
+[node name="CardPileView" parent="UILayer" instance=ExtResource("8_pileview")]
+
+[node name="CardTooltip" parent="UILayer" instance=ExtResource("9_tooltip")]
+
+[node name="Flash" type="ColorRect" parent="UILayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="TopBar" parent="UILayer" instance=ExtResource("11_bar")]
+
+[node name="Pause" type="Button" parent="UILayer"]
+layout_mode = 0
+offset_left = 216.0
+offset_top = 24.0
+offset_right = 252.0
+offset_bottom = 38.0
+theme_override_font_sizes/font_size = 12
+text = "暂停"
+
+[node name="PauseLabel" type="Label" parent="UILayer"]
+visible = false
+layout_mode = 0
+offset_left = 96.0
+offset_top = 64.0
+offset_right = 160.0
+offset_bottom = 80.0
+theme_override_colors/font_color = Color(0.98, 0.92, 0.75, 1)
+theme_override_font_sizes/font_size = 12
+text = "已暂停"
+
+[node name="Help" type="Button" parent="UILayer"]
+layout_mode = 0
+offset_left = 168.0
+offset_top = 24.0
+offset_right = 212.0
+offset_bottom = 38.0
+theme_override_font_sizes/font_size = 12
+text = "玩法"
+
+[node name="HelpPanel" type="PanelContainer" parent="UILayer"]
+visible = false
+layout_mode = 0
+offset_left = 8.0
+offset_top = 6.0
+offset_right = 248.0
+offset_bottom = 144.0
+theme_override_styles/panel = SubResource("sb_help")
+
+[node name="HelpBox" type="VBoxContainer" parent="UILayer/HelpPanel"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="HelpHeader" type="HBoxContainer" parent="UILayer/HelpPanel/HelpBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="HelpTitle" type="Label" parent="UILayer/HelpPanel/HelpBox/HelpHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.98, 0.86, 0.6, 1)
+theme_override_font_sizes/font_size = 12
+text = "怎么玩"
+horizontal_alignment = 1
+
+[node name="HelpClose" type="Button" parent="UILayer/HelpPanel/HelpBox/HelpHeader"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "关闭"
+
+[node name="HelpText" type="Label" parent="UILayer/HelpPanel/HelpBox"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(0.92, 0.9, 0.85, 1)
+theme_override_constants/line_spacing = -1
+theme_override_font_sizes/font_size = 12
+text = "1. 左上角=花费；能量不够时卡会变暗
+2. 拖到敌人=攻击，拖到空地=防御
+3. 敌人头顶数字=它这回合的行动
+4. 伤害先扣护盾，护盾每回合清零
+5. 能量用完只能点「结束」，下回合回满
+6. 一轮=你出牌 → 敌人行动 → 再轮到你
+7. 易伤×1.5　力量+N　虚弱×0.75"
+autowrap_mode = 2
+
+[node name="BattleOverPanel" parent="UILayer" instance=ExtResource("10_over")]
+
+[node name="CardRewards" parent="UILayer" instance=ExtResource("12_rewards")]

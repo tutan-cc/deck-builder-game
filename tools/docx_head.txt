@@ -1,0 +1,55 @@
+000 [Heading 1] 分集详解 P1–P19
+001 [Normal] 这是详细版：每集分「视频里做了什么 / 我实现了什么 / 关键代码 / 踩坑与取舍 / 怎么验证 / 与视频的差异」六段。
+002 [Normal] 速览版（P1–P25 全景）见 `分集说明.md`。
+003 [Normal] 工程：D:\deepseek工作区\deck-builder-game
+004 [Normal] 引擎：Godot 4.7.2（视频用 4.1 / 4.3）
+005 [Normal] 素材：guladam/deck_builder_tutorial 的 season-1-starter-project 分支（Kenney 
+006 [Normal] 视口：256×144，窗口 1280×720，最近邻采样
+007 [Heading 2] 阅读前必看：这份重建的诚实边界
+009 [Normal] 所以下面写着「视频里」的部分，P1/P2/P4/P7 是从画面读出来的；其余是根据标题和成品仓库推断的意图，不是逐字台词。凡是推断，我会标「
+010 [Normal] 另外有三处分集归并，先讲清楚，免得对不上：
+011 [List Number] P9 / P10 我是合着做的。P9「法力 UI 与效果」和 P10「打出与禁用」在代码上是同一块（扣能量→执行效果→进弃牌堆→能量不够退回
+012 [List Number] 受击闪白我放在了 P17（「战斗手感打磨」），因为 P9 的真实主题是法力与效果，不是打击感。
+013 [List Number] P6 的数据层一次建全（Card / CardPile / Stats / Effect），后面每集只是往上加字段。
+014 [Normal] 各集「怎么验证」里贴的自检输出，是当时那一步跑出来的。自检脚本（tools/feature_test.gd）随阶段演进了好几轮，现在跑它会打
+015 [Heading 2] 总览
+017 [Heading 2] 截图索引
+018 [Normal] 所有截图在工程根目录的 shots/ 下，_big 是放大 3 倍的版本。
+020 [Normal] ---|---|---|
+021 [Normal] | P1 | p3_1_base_big.png | 背景只有一层 Sprite2D |
+022 [Normal] | P2 | p3_2_dragging_big.png | 拖动中的卡（调试配色 + 状态名） |
+023 [Normal] | P3 | p3_3_returned_big.png | 松手落在区外，卡回手牌 |
+024 [Normal] | P4 | p10_2_aiming_big.png | 从原位画出的弧线 |
+025 [Normal] | P5 | r11_aim_big.png | 弧线 + 目标箭头 + 放大 |
+026 [Normal] | P6 | p10_1_battle_big.png | 数据层落地后的战斗 |
+027 [Normal] | P7 | p26_topbar_big.png | 血量 / 能量 / 抽弃计数 |
+028 [Normal] | P8 | p24_card_menu_big.png | 卡面：费用 / 图标 / 名字 / 稀有度条 |
+029 [Normal] | P9 | p10_3_after_strike_big.png | 一张牌打出后的结算 |
+030 [Normal] | P10 | p11_unaffordable_big.png | 能量不足，整张压暗 |
+031 [Normal] | P11 | p11_tooltip_big.png | 悬停提示框 |
+032 [Normal] | P12 | p12_after_play_big.png | 打出一张后的手牌 / 弃牌 / 能量 |
+033 [Normal] | P13 | p13_pile_view_big.png | 牌堆查看 |
+034 [Normal] | P14 | p16_intents_big.png | 敌人意图数字 |
+035 [Normal] | P15 | p17_turn_big.png | 敌人回合执行完 |
+036 [Normal] | P16 | p16_intents_big.png | 意图按类型上色 |
+037 [Normal] | P17 | p19_victory_big.png | 震屏抓不到，这张是同一套 UI 的结算画面 |
+038 [Normal] | P18 | p10_1_battle_big.png | 音效挂载的战斗场景 |
+040 [Heading 1] P1 · 项目创建、背景场景与像素画质优化（9:26）
+042 [Normal] 只有一层 Sprite2D：墙砖 + 棕色地面，没有任何 UI
+043 [Heading 2] 视频里
+044 [List Number] 0:00–1:25 演示成品：35 血战士对两只小怪 + 一只 12 血厚怪；手牌在右下角；End Turn；抽牌堆显示 1/3；打出 De
+045 [List Number] 1:25–4:30 讲架构（这集最值钱的部分，是这一集真正在教的东西）：
+046 [Normal] - Battle 管回合、胜败条件
+047 [Normal] - EnemyHandler 管敌人回合、触发敌人行动
+048 [Normal] - PlayerHandler 管玩家回合、拖拽出牌
+049 [Normal] - Player 显示数值、表现伤害
+050 [Normal] - 数据用 Resource：Card（cost/effect）、CardPile、Effect、Stats → CharacterStat
+051 [List Number] 4:30 去找配套工程；4:45 感谢 Kenney 的 Tiny Dungeon 素材；4:52 新建工程 deck builder ga
+052 [List Number] 5:00–9:25 导入素材、把默认纹理过滤改成 Nearest、铺墙和地面背景。
+053 [Heading 2] 我实现了什么
+054 [List Bullet] project.godot：256×144 视口、窗口 1280×720、stretch/mode="viewport"、最近邻采样、Mob
+055 [List Bullet] scenes/battle/battle.tscn：Sprite2D + background.png，centered = false
+056 [Normal] [display]
+057 [Normal] window/size/viewport_width=256
+058 [Normal] window/size/viewport_height=144
+059 [Normal] window/size/window_width_override=1280

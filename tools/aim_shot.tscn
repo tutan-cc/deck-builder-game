@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bdkaimshot01"]
+
+[ext_resource type="Script" path="res://tools/aim_shot.gd" id="1_shot"]
+
+[node name="AimShot" type="Node"]
+script = ExtResource("1_shot")

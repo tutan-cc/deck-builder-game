@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bdkaimradiu1"]
+
+[ext_resource type="Script" path="res://tools/aim_radius_test.gd" id="1_a"]
+
+[node name="AimRadius" type="Node"]
+script = ExtResource("1_a")
