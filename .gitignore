@@ -27,3 +27,7 @@ shots/feel/*_??.png.import
 # 音效生成的中间产物（tools/gen_sfx.py 下载的原始 wav、裁剪结果、日志）。
 # 成品在 art/audio/*.ogg，只有那个要进仓库。
 sfx_work/
+
+# Python 的字节码缓存（tools/*.py 会被 import）
+__pycache__/
+*.pyc
