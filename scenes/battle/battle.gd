@@ -151,6 +151,8 @@ func _on_play_requested(card_ui: CardUI, targets: Array) -> void:
 		# 命中定格 60ms：特效本身只有三四帧，不冻一下根本看不清"打到了"
 		Juice.hit_stop(0.06)
 	Sfx.play("slash" if is_attack else "block")
+	# 出牌本身也有声音（纸牌甩出），和命中音同时响，层次才不单薄
+	Sfx.play("card_play")
 	Shaker.shake(shake_amount, shake_time)
 	# 卡牌被"用掉"也要有个交代：原地冒一下烟再消失，别凭空不见。
 	# 挂在 UI 层上——卡牌在 CanvasLayer 里，贴在 Battle 下面是会被手牌盖住的。
@@ -196,6 +198,7 @@ func _win() -> void:
 		got_relic = relic.title
 
 	_update_piles()
+	Sfx.play("victory")
 	# 胜利的那一下：先在玩家身上放一朵"收下战果"的星芒，0.45s 后再弹奖励面板，
 	# 不然面板盖上来，这一下等于没播
 	Juice.play_pixel(self, "pickups/collect-burst", player.global_position + Vector2(0, -10), {"z": 55})
@@ -217,6 +220,7 @@ func _lose() -> void:
 	top_bar.set_end_enabled(false)
 	# 被打倒：心碎一下再弹失败面板
 	Juice.play_pixel(self, "ui/heart-lost", player.global_position + Vector2(0, -10), {"z": 55})
+	Sfx.play("defeat")
 	over_panel.show_result(false, "第 %d 回合被打倒" % round_index)
 
 

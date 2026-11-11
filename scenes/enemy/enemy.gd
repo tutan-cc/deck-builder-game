@@ -59,6 +59,7 @@ func _on_stats_changed() -> void:
 		Juice.play_pixel(get_parent(), "explosions/cartoon-pow", global_position, {"z": 47, "scale": 0.45})
 		# 消失前先冒一下烟，不然是"啪"地凭空不见
 		Juice.play_fx(global_position, preload("res://art/fx/puff.png"), 16, 14.0, {"offset": Vector2(0, -6)})
+		Sfx.play("enemy_die")
 		queue_free()
 
 
@@ -107,6 +108,8 @@ func take_damage(amount: int) -> void:
 		Juice.play_fx(global_position, BLOCK_BREAK_FX, 16, 16.0, {"offset": Vector2(0, 2), "scale": 1.6})
 	_flash()
 	_squash()
+	if dealt > 0:
+		Sfx.play("damage")
 	# 命中特效：8 点以上换大号，让"这一刀很疼"看得出来。
 	# 注意选的都是 meta 里没有 actor 的效果——带 actor 的会自己画一个原装小人，
 	# 贴在敌人身上就是两个人在打架（前面 hit-flash 就栽在这）。

@@ -21,3 +21,9 @@ addons/godot_ai/
 # 只保留拼好的对比图（strip_*、compare.*、in_game*.png、moments.png）。
 shots/fx/*_??.png
 shots/feel/*_??.png
+shots/fx/*_??.png.import
+shots/feel/*_??.png.import
+
+# 音效生成的中间产物（tools/gen_sfx.py 下载的原始 wav、裁剪结果、日志）。
+# 成品在 art/audio/*.ogg，只有那个要进仓库。
+sfx_work/

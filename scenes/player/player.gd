@@ -66,6 +66,8 @@ func take_damage(amount: int) -> void:
 		Juice.play_fx(global_position, BLOCK_BREAK_FX, 16, 16.0, {"offset": Vector2(0, 2), "scale": 1.6})
 	_flash()
 	_squash()
+	if dealt > 0:
+		Sfx.play("damage")
 	# 敌人扑上来打在玩家身上，也要有落点（原来只有红屏 + 抖动，看不出打在哪）
 	if dealt > 0:
 		Juice.play_pixel(get_parent(), "impacts/blunt-hit", global_position, {"z": 46})

@@ -37,6 +37,8 @@ func open(cards: Array, gold: int) -> void:
 	modulate.a = 0.0
 	var tween := create_tween()
 	tween.tween_property(self, "modulate:a", 1.0, 0.18)
+	# 金币入袋的声音：奖励面板一出来就响，和"◈ +13"对上
+	Sfx.play("coin")
 
 
 func _on_card_input(event: InputEvent, card: Card, card_ui: CardUI) -> void:

@@ -46,5 +46,7 @@ func execute(actor: Node, target: Node) -> void:
 		Type.BLOCK:
 			if actor and actor.has_method("add_block"):
 				actor.add_block(value)
+				# 敌人举盾也有声音：这条音效原来在 SOUNDS 里躺着没人播
+				Sfx.play("enemy_block")
 		_:
 			pass
