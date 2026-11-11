@@ -11,7 +11,7 @@ extends SceneTree
 ## 直接 play() 会报 "Playback can only happen when a node is inside the scene tree"。
 
 const SOUNDS := {
-	"slash": 0.32, "block": 0.26, "damage": 0.26, "enemy_attack": 0.30,
+	"slash": 0.32, "block": 0.45, "damage": 0.26, "enemy_attack": 0.30,
 	"enemy_block": 0.24, "enemy_die": 0.50, "card_play": 0.16,
 	"victory": 1.50, "defeat": 1.50, "coin": 0.23, "axe": 0.32,
 	"ui_click": 0.07,

@@ -111,20 +111,38 @@ def s_slash() -> np.ndarray:
     return mix(air * 0.75, shing * 0.5)
 
 
-def s_block() -> np.ndarray:
-    """格挡：沉闷的金属闷响，几乎不含高频气流——和挥砍正好相反。
+def at(x: np.ndarray, offset_sec: float) -> np.ndarray:
+    n = int(SR * offset_sec)
+    return np.concatenate([np.zeros(n, dtype=np.float32), x]) if n > 0 else x
 
-    用 220/330/470Hz 三个不成谐波的方波叠出"盾牌被砸"的木质金属感，
-    再加一个 90Hz 的胸腔冲击。
+
+def s_block() -> np.ndarray:
+    """加盾：治疗/升华感的大三和弦上行 + 高频闪光，不是"咚"。
+
+    和打击类最大的区别在包络：这里是几毫秒的软起音 + 长衰减，
+    打击类全是 1–2ms 硬起音、几十毫秒就没。音色用三角波打底 + 低占空比方波提亮，
+    底下只垫一点点根音（垫多了会变闷，第一版就是这么翻车的：质心只有 1543Hz）。
     """
-    d = 0.26
-    body = mix(
-        square(sweep(220.0, 150.0, d, 1.2), d, 0.5) * env(d, 0.001, 14.0),
-        square(330.0, d, 0.5) * env(d, 0.001, 18.0) * 0.6,
-        square(470.0, d, 0.25) * env(d, 0.001, 22.0) * 0.35,
-    )
-    knock = square(90.0, d) * env(d, 0.001, 10.0) * 0.8
-    return mix(body, knock)
+    d = 0.45
+    notes = [659.25, 830.61, 1108.73]   # E5 G#5 C#6，三个音就够"往上走"，不和胜利的四音号角撞车
+    lead = np.zeros(1, dtype=np.float32)
+    for i, f in enumerate(notes):
+        body = triangle(f, 0.34) * 0.7
+        edge = square(f, 0.34, 0.125) * 0.3          # 低占空比 = 亮而不刺
+        tone = (body + edge) * env(0.34, 0.006, 3.0)
+        lead = mix(lead, at(tone, i * 0.055))
+    # 尾音：停在最高的 C#6 上，留住"升上去不落下来"的感觉
+    lead = mix(lead, at(triangle(1108.73, 0.36) * env(0.36, 0.01, 1.6) * 0.75, 0.22))
+    # 高频闪光：四次极短的点，只求"亮"
+    sparkle = np.zeros(1, dtype=np.float32)
+    for t in [0.02, 0.09, 0.16, 0.26]:
+        s = square(3520.0, 0.035, 0.25) * env(0.035, 0.001, 20.0)
+        sparkle = mix(sparkle, at(s, t))
+    # 低频垫：只在前 0.2 秒给一点体温，衰减要快——后半段必须还是亮的，
+    # 不然听起来是"往下沉"而不是"往上飘"（第一版就是后半段压到 2344Hz）
+    warm = triangle(277.18, 0.22) * env(0.22, 0.02, 6.0) * 0.16
+    return pad(mix(lead, sparkle * 0.30, warm), d)
+
 
 
 def s_enemy_block() -> np.ndarray:
