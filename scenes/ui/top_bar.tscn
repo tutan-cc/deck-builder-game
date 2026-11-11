@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://bdktopbar001"]
+[gd_scene load_steps=4 format=3 uid="uid://bdktopbar001"]
 
 [ext_resource type="Script" path="res://scenes/ui/top_bar.gd" id="1_bar"]
+[ext_resource type="Texture2D" path="res://art/ui/energy_orb.png" id="2_orb"]
 
 [sub_resource type="StyleBoxFlat" id="sb_bar"]
 bg_color = Color(0.0705882, 0.0627451, 0.0784314, 0.92)
@@ -34,11 +35,18 @@ theme_override_colors/font_color = Color(0.980392, 0.850980, 0.450980, 1)
 theme_override_font_sizes/font_size = 12
 text = "◆ 0"
 
+[node name="EnergyOrb" type="TextureRect" parent="Row"]
+custom_minimum_size = Vector2(11, 11)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("2_orb")
+stretch_mode = 5
+
 [node name="Energy" type="Label" parent="Row"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.87, 0.42, 1)
 theme_override_font_sizes/font_size = 12
-text = "能 0/0"
+text = "0/0"
 
 [node name="Spacer" type="Control" parent="Row"]
 layout_mode = 2

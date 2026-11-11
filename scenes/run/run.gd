@@ -33,4 +33,4 @@ func _refresh() -> void:
 
 func _enter_battle() -> void:
 	# P31：先进地图，由地图决定打哪个房间
-	get_tree().change_scene_to_file("res://scenes/map/map.tscn")
+	Juice.fade_transition("res://scenes/map/map.tscn")

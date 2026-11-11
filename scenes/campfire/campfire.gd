@@ -15,6 +15,7 @@ var _upgraded := false
 
 
 func _ready() -> void:
+	Juice.prewarm(self, ["holy/heal"])
 	leave_button.pressed.connect(_leave)
 	rest_button.pressed.connect(_rest)
 	upgrade_button.pressed.connect(_ask_upgrade)
@@ -40,15 +41,19 @@ func _current_hp() -> int:
 
 func _refresh() -> void:
 	info.text = "生命 %d / %d · 卡组 %d 张" % [_current_hp(), _max_hp(), RunState.deck.size()]
+	# 满血时休息没有意义：点了只会看到"恢复了 0 点生命"。直接禁掉，别让人白点一次
+	rest_button.disabled = _rested or _current_hp() >= _max_hp()
 
 
 func _rest() -> void:
-	if _rested:
+	if _rested or _current_hp() >= _max_hp():
 		return
 	_rested = true
 	var healed := RunState.heal(int(ceil(_max_hp() * 0.3)))
 	rest_button.disabled = true
 	info.text = "恢复了 %d 点生命（%d / %d）" % [healed, _current_hp(), _max_hp()]
+	# 回血只有一行文字太素：在火堆上放一个治疗特效
+	Juice.play_pixel(self, "holy/heal", Vector2(128, 62), {"scale": 0.7, "z": 5})
 	Sfx.play("block")
 
 
@@ -74,4 +79,4 @@ func _on_card_selected(card: Card) -> void:
 
 
 func _leave() -> void:
-	get_tree().change_scene_to_file("res://scenes/map/map.tscn")
+	Juice.fade_transition("res://scenes/map/map.tscn")

@@ -18,7 +18,7 @@ static func warrior() -> Character:
 	character.id = "warrior"
 	character.title = "战士"
 	character.description = "35 血 · 3 能量 · 攻守均衡"
-	character.art = load("res://art/tile_0130.png")
+	character.art = load("res://art/actors/actor_warrior.png")
 	character.max_health = 35
 	character.max_energy = 3
 	for i in 4:
@@ -34,7 +34,7 @@ static func hunter() -> Character:
 	character.id = "hunter"
 	character.title = "猎手"
 	character.description = "28 血 · 4 能量 · 爆发高"
-	character.art = load("res://art/tile_0108.png")
+	character.art = load("res://art/actors/actor_hunter.png")
 	character.max_health = 28
 	character.max_energy = 4
 	for i in 3:

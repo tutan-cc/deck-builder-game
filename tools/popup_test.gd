@@ -24,7 +24,7 @@ func _ready() -> void:
 	battle._on_play_requested(strike, [enemy])
 	await get_tree().create_timer(0.12).timeout
 
-	var layer: CanvasLayer = Fx.layer
+	var layer: CanvasLayer = Juice.layer
 	print("T fx labels=%d" % layer.get_child_count())
 	await RenderingServer.frame_post_draw
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://shots"))

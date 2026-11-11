@@ -35,8 +35,8 @@ static func encounters() -> Array:
 	tough_pair.weight = 2.0
 	tough_pair.enemy_count = 2
 	tough_pair.enemy_kinds = ["crab", "crab"]
-	tough_pair.hp_multiplier = 1.4
-	tough_pair.damage_multiplier = 1.3
+	tough_pair.hp_multiplier = 1.25
+	tough_pair.damage_multiplier = 1.1
 	tough_pair.gold_reward_min = 18
 	tough_pair.gold_reward_max = 28
 	list.append(tough_pair)
@@ -47,7 +47,7 @@ static func encounters() -> Array:
 	trio.weight = 1.0
 	trio.enemy_count = 3
 	trio.enemy_kinds = ["bat", "crab", "bat"]
-	trio.hp_multiplier = 1.2
+	trio.hp_multiplier = 0.95
 	trio.damage_multiplier = 1.1
 	trio.gold_reward_min = 24
 	trio.gold_reward_max = 36

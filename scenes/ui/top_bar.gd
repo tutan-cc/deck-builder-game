@@ -40,6 +40,6 @@ func set_end_enabled(value: bool) -> void:
 
 ## 能量单独放顶栏：原来它贴在玩家头顶，和血量/护盾挤在一起看不清
 func set_energy(current: int, maximum: int) -> void:
-	energy_label.text = "能 %d/%d" % [current, maximum]
+	energy_label.text = "%d/%d" % [current, maximum]
 	energy_label.add_theme_color_override("font_color",
 		Color(1, 0.87, 0.42) if current > 0 else Color(0.75, 0.55, 0.5))

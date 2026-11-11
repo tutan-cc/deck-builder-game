@@ -1,16 +1,18 @@
-[gd_scene load_steps=6 format=3 uid="uid://bdkenemy0001"]
+[gd_scene load_steps=7 format=3 uid="uid://bdkenemy0001"]
 
 [ext_resource type="Script" path="res://scenes/enemy/enemy.gd" id="1_enemy"]
 [ext_resource type="PackedScene" path="res://scenes/ui/stats_ui.tscn" id="2_statsui"]
-[ext_resource type="Texture2D" path="res://art/tile_0108.png" id="3_icon"]
+[ext_resource type="Texture2D" path="res://art/actors/actor_crab.png" id="3_icon"]
 [ext_resource type="PackedScene" path="res://scenes/ui/intent_ui.tscn" id="4_intent"]
 [ext_resource type="Texture2D" path="res://art/arrow.png" id="5_arrow"]
+[ext_resource type="Script" path="res://global/sprite_anim.gd" id="6_anim"]
 
 [node name="Enemy" type="Node2D" groups=["enemies"]]
 script = ExtResource("1_enemy")
 
 [node name="Icon" type="Sprite2D" parent="."]
 texture = ExtResource("3_icon")
+script = ExtResource("6_anim")
 
 [node name="StatsUI" parent="." instance=ExtResource("2_statsui")]
 offset_left = -14.0

@@ -43,7 +43,7 @@ func _return_home() -> void:
 	var timer := get_tree().create_timer(RETURN_DELAY, false)
 	timer.timeout.connect(func() -> void:
 		if is_instance_valid(card_ui):
-			transition_requested.emit(self, State.BASE)
+			request(State.BASE)
 	)
 
 
@@ -60,7 +60,7 @@ func _hint_no_target() -> void:
 	label.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.05))
 	label.add_theme_constant_override("outline_size", 3)
 	label.z_index = 120
-	var layer := Fx.layer
+	var layer := Juice.layer
 	layer.add_child(label)
 	label.position = card_ui.mouse_position() + Vector2(-40, -30)
 	var tween := label.create_tween()

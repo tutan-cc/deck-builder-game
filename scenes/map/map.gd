@@ -11,6 +11,18 @@ const SPACING_X := 32.0
 const SPACING_Y := 18.0
 const ORIGIN := Vector2(20, 16)
 
+## 房间类型 → 12×12 图标。原来是一个汉字（战/精/事/商/营/宝/王），
+## 汉字要读，图标可以直接扫。
+const ROOM_ICONS := {
+	Room.Type.BATTLE: preload("res://art/map/room_battle.png"),
+	Room.Type.ELITE: preload("res://art/map/room_elite.png"),
+	Room.Type.EVENT: preload("res://art/map/room_event.png"),
+	Room.Type.SHOP: preload("res://art/map/room_shop.png"),
+	Room.Type.CAMPFIRE: preload("res://art/map/room_campfire.png"),
+	Room.Type.TREASURE: preload("res://art/map/room_treasure.png"),
+	Room.Type.BOSS: preload("res://art/map/room_boss.png"),
+}
+
 @onready var scroll: ScrollContainer = $Scroll
 @onready var content: Control = $Scroll/Content
 @onready var rooms_root: Control = $Scroll/Content/Rooms
@@ -20,6 +32,10 @@ const ORIGIN := Vector2(20, 16)
 
 var rooms: Array = []
 var nodes: Array = []
+## 每条房间的金色描边（可走时显示）
+var frames: Array = []
+## "你在这里"标记：一条金色小横杠，贴在当前位置房间的上沿
+var marker: ColorRect
 
 
 func _ready() -> void:
@@ -27,7 +43,7 @@ func _ready() -> void:
 		RunState.new_map()
 	rooms = RunState.map_rooms
 	back_button.pressed.connect(func() -> void:
-		get_tree().change_scene_to_file("res://scenes/run/run.tscn"))
+		Juice.fade_transition("res://scenes/run/run.tscn"))
 	content.custom_minimum_size = Vector2(256, MapGenerator.ROWS * SPACING_Y + ORIGIN.y + 26)
 	_build()
 	_refresh()
@@ -51,6 +67,7 @@ func _build() -> void:
 	for child in lines.get_children():
 		child.queue_free()
 	nodes.clear()
+	frames.clear()
 
 	for i in rooms.size():
 		var room: Room = rooms[i]
@@ -62,18 +79,33 @@ func _build() -> void:
 
 		var bg := ColorRect.new()
 		bg.size = ROOM_SIZE
-		bg.color = room.color()
+		# 压暗类型色当底：图标要压在它上面，背景不能抢
+		bg.color = room.color().darkened(0.55)
 		bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		holder.add_child(bg)
 
-		var label := Label.new()
-		label.text = room.label()
-		label.size = ROOM_SIZE
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		label.add_theme_font_size_override("font_size", 12)
-		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		holder.add_child(label)
+		var icon := TextureRect.new()
+		icon.texture = ROOM_ICONS.get(room.type)
+		icon.position = Vector2(6, 2)
+		icon.size = Vector2(12, 12)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		holder.add_child(icon)
+
+		# 可走房间的金色描边。用 modulate 提亮不行——它是乘法，
+		# 红色精英房提亮后还是红的，玩家分不清"能走"和"不能走"。
+		var frame := Panel.new()
+		frame.size = ROOM_SIZE
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0, 0, 0, 0)
+		sb.border_color = Color(1.0, 0.84, 0.38, 1.0)
+		sb.set_border_width_all(1)
+		frame.add_theme_stylebox_override("panel", sb)
+		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		frame.visible = false
+		holder.add_child(frame)
+		frames.append(frame)
 
 		rooms_root.add_child(holder)
 		nodes.append(holder)
@@ -84,6 +116,13 @@ func _build() -> void:
 				holder.modulate = Color(1.6, 1.55, 1.3))
 		holder.mouse_exited.connect(func() -> void:
 			_refresh())
+
+	# "你在这里"标记（金色横杠，压在房间上沿）
+	marker = ColorRect.new()
+	marker.size = Vector2(ROOM_SIZE.x, 2)
+	marker.color = Color(1.0, 0.84, 0.38)
+	marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rooms_root.add_child(marker)
 
 	for i in rooms.size():
 		for j in rooms[i].next:
@@ -101,17 +140,28 @@ func _refresh() -> void:
 		var holder: Control = nodes[i]
 		var room: Room = rooms[i]
 		if available.has(i):
-			holder.modulate = Color(1.25, 1.2, 1.05)      # 亮一点 = 能去
+			holder.modulate = Color(1.18, 1.14, 1.0)
+			if i < frames.size():
+				frames[i].visible = true
 		elif room.visited:
 			holder.modulate = Color(0.55, 0.65, 0.55)      # 走过的
 		else:
-			holder.modulate = Color(0.62, 0.62, 0.68, 0.9)
+			holder.modulate = Color(0.55, 0.55, 0.6, 0.9)
 
 	var room_now := RunState.current_room
+	if marker:
+		if room_now >= 0 and room_now < nodes.size():
+			marker.visible = true
+			marker.position = _pos(rooms[room_now]) + Vector2(0, -3)
+		else:
+			marker.visible = false
+
 	if room_now >= 0 and room_now < rooms.size():
-		info.text = "%s · 第 %d 层 · 金币 %d" % [rooms[room_now].label(), rooms[room_now].row + 1, RunState.gold]
+		# 提示要短：太长会撞到右下角"返回"按钮，也会被左边界切掉首字
+		var tail := " → 点亮房间" if not available.is_empty() else " · 本层到头"
+		info.text = "第 %d 层 · %d 金%s" % [rooms[room_now].row + 1, RunState.gold, tail]
 	else:
-		info.text = "选择起点 · 金币 %d" % RunState.gold
+		info.text = "选起点 · 点金框 · %d 金" % RunState.gold
 
 
 func _on_room_input(event: InputEvent, index: int) -> void:
@@ -129,4 +179,5 @@ func _enter(index: int) -> void:
 	RunState.depth = room.row + 1
 
 	# 宝箱 / 事件 / 商店 现在有独立场景（scenes/rooms/room_event.tscn）
-	get_tree().change_scene_to_file(RunState.scene_for(room.type))
+	# 过场走 Juice.fade_transition：淡出 → 换场景 → 淡入。
+	await Juice.fade_transition(RunState.scene_for(room.type))

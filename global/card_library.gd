@@ -13,7 +13,7 @@ static func strike() -> Card:
 	var effect := DamageEffect.new()
 	effect.amount = 6
 	card.effects.append(effect)
-	card.icon = load("res://art/tile_0124.png")
+	card.icon = load("res://art/cards/icons/icon_strike.png")
 	card.tooltip_text = "Deal 6 damage."
 	card.rarity = Card.Rarity.COMMON
 	return card
@@ -29,7 +29,7 @@ static func defend() -> Card:
 	var effect := BlockEffect.new()
 	effect.amount = 5
 	card.effects.append(effect)
-	card.icon = load("res://art/tile_0084.png")
+	card.icon = load("res://art/cards/icons/icon_defend.png")
 	card.tooltip_text = "Gain 5 block."
 	return card
 
@@ -43,6 +43,7 @@ static func cleave() -> Card:
 	effect.amount = 4
 	card.rarity = Card.Rarity.UNCOMMON
 	card.tooltip_text = "Deal 4 damage to ALL enemies."
+	card.icon = load("res://art/cards/icons/icon_cleave.png")
 	return card
 
 
@@ -59,6 +60,7 @@ static func bash() -> Card:
 	card.effects.append(vulnerable)
 	card.rarity = Card.Rarity.UNCOMMON
 	card.tooltip_text = "Deal 8 damage. Apply 2 Vulnerable."
+	card.icon = load("res://art/cards/icons/icon_bash.png")
 	return card
 
 
@@ -75,6 +77,7 @@ static func iron_wave() -> Card:
 	card.effects.append(block)
 	card.rarity = Card.Rarity.RARE
 	card.tooltip_text = "Deal 5 damage. Gain 5 block."
+	card.icon = load("res://art/cards/icons/icon_iron_wave.png")
 	return card
 
 

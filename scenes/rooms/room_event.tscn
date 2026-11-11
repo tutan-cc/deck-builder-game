@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://bdkroomevent"]
 
 [ext_resource type="Script" path="res://scenes/rooms/room_event.gd" id="1_room"]
-[ext_resource type="Texture2D" path="res://art/background.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://art/backgrounds/bg_event.png" id="2_bg"]
 [ext_resource type="PackedScene" path="res://scenes/ui/card_menu.tscn" id="3_menu"]
 
 [sub_resource type="StyleBoxFlat" id="sb_room"]

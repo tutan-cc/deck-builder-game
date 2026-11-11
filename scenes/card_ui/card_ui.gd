@@ -20,12 +20,22 @@ const TYPE_COLORS := {
 	Card.Type.POWER: Color(0.30, 0.26, 0.42),
 }
 
+## 卡面边框：Aseprite 生成的 44×54 像素图（art/cards/），
+## 中间是透明的，所以底色仍由 Background 的 TYPE_COLORS 决定，
+## 三种类型只差描边内侧那圈 accent 色。
+const FRAME_TEXTURES := {
+	Card.Type.ATTACK: preload("res://art/cards/card_frame_attack.png"),
+	Card.Type.SKILL: preload("res://art/cards/card_frame_skill.png"),
+	Card.Type.POWER: preload("res://art/cards/card_frame_power.png"),
+}
+
 @export var card: Card
 ## P25：卡组视图里的卡是只读的——不装状态机、不能拖、不能打，但还能悬停看提示
 @export var interactive := true
 
 @onready var state_machine: CardStateMachine = $CardStateMachine
 @onready var background: ColorRect = $Background
+@onready var frame: TextureRect = $Frame
 @onready var rarity_bar: ColorRect = $Rarity
 @onready var icon: TextureRect = $Icon
 @onready var cost_label: Label = $Cost
@@ -70,6 +80,7 @@ func set_card(new_card: Card) -> void:
 	if card.icon:
 		icon.texture = card.icon
 	background.color = TYPE_COLORS.get(card.type, Color(0.42, 0.26, 0.26))
+	frame.texture = FRAME_TEXTURES.get(card.type)
 	# P27：卡顶那条 2px 色带就是稀有度——比改整张底色更不干扰图标
 	rarity_bar.color = Card.RARITY_COLORS.get(card.rarity, Color(0.62, 0.6, 0.56))
 

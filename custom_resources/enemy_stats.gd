@@ -7,6 +7,8 @@ extends Stats
 @export var attack_damage := 6
 ## P14：这个敌人会哪些动作，权重和条件都写在动作里
 @export var actions: Array[EnemyAction] = []
+## 出手时播的攻击帧条（可选）。留空就还是只有扑击位移
+@export var attack_art: Texture2D
 
 
 func roll_intent() -> int:

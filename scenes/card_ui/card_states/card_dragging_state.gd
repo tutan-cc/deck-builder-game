@@ -14,7 +14,7 @@ func enter() -> void:
 
 func post_enter() -> void:
 	if card_ui.card and card_ui.card.is_single_targeted():
-		transition_requested.emit(self, State.AIMING)
+		request(State.AIMING)
 
 
 func exit() -> void:
@@ -24,6 +24,6 @@ func exit() -> void:
 
 func _process(_delta: float) -> void:
 	if Input.is_action_just_released("left_mouse"):
-		transition_requested.emit(self, State.RELEASED)
+		request(State.RELEASED)
 		return
 	card_ui.global_position = card_ui.mouse_position() - card_ui.size * 0.5

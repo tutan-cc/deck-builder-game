@@ -23,8 +23,8 @@ func exit() -> void:
 func _process(_delta: float) -> void:
 	# 先判松手：按一下立刻放开 = 回到 base，不该被当成拖动
 	if Input.is_action_just_released("left_mouse"):
-		transition_requested.emit(self, State.BASE)
+		request(State.BASE)
 		return
 
 	if card_ui.get_global_mouse_position().distance_to(_press_position) > DRAG_THRESHOLD:
-		transition_requested.emit(self, State.DRAGGING)
+		request(State.DRAGGING)

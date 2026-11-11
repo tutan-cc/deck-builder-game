@@ -62,7 +62,7 @@ func add_relic(relic: Relic) -> void:
 
 func apply_to(stats: CharacterStats) -> void:
 	if character:
-		stats.max_health = character.max_health
+		stats.max_health = character.max_health + bonus_max_health()
 		stats.max_energy = character.max_energy
 		stats.energy = character.max_energy
 	for relic in relics:
@@ -90,7 +90,16 @@ func available_rooms() -> Array:
 		return out
 	if current_room >= map_rooms.size():
 		return out
-	return (map_rooms[current_room] as Room).next.duplicate()
+	var here: Room = map_rooms[current_room]
+	out = here.next.duplicate()
+	# 兜底：万一这间房的 next 空了（生成或删线出问题），玩家会被硬卡在地图上。
+	# 这里直接从下一行捞房间接上，宁可多一条没画出来的边，也不能走不动。
+	if out.is_empty() and here.row < MapGenerator.ROWS - 1:
+		for i in map_rooms.size():
+			if (map_rooms[i] as Room).row == here.row + 1:
+				out.append(i)
+		push_warning("地图死胡同：房间 %d（第 %d 层）没有出路，已自动接下一行" % [current_room, here.row + 1])
+	return out
 
 
 func scene_for(type: int) -> String:
@@ -112,10 +121,16 @@ func current_room_type() -> int:
 	return Room.Type.BATTLE
 
 
+## 玩家唯一随层数成长的东西。原来血量上限写死 35，敌人却按 1.6 倍变强，
+## 深度 5 之后数学上就打不赢了。
+func bonus_max_health() -> int:
+	return maxi(0, depth - 1) * 4
+
+
 func heal(amount: int) -> int:
 	if character == null:
 		return 0
-	var max_hp := character.max_health
+	var max_hp := character.max_health + bonus_max_health()
 	var now := max_hp if current_health < 0 else current_health
 	var healed := mini(max_hp - now, amount)
 	current_health = now + healed

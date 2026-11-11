@@ -15,6 +15,12 @@ signal transition_requested(from: CardState, to: State)
 var card_ui: CardUI
 
 
+## 换状态统一走这里。子状态原来自己 `transition_requested.emit(self, ...)`，
+## 但那是在子类里发基类声明的信号，GDScript 会报 UNUSED_SIGNAL（"声明类里没用过"）。
+func request(to: State) -> void:
+	transition_requested.emit(self, to)
+
+
 func enter() -> void:
 	pass
 

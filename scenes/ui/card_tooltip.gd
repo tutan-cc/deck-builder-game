@@ -13,7 +13,7 @@ func _ready() -> void:
 	hide_tip()
 
 
-func show_text(text: String, at: Vector2) -> void:
+func show_text(text: String, _at: Vector2) -> void:
 	if text.is_empty():
 		return
 	label.text = text

@@ -172,4 +172,4 @@ func _buy(card: Card, price: int, button: Button) -> void:
 
 
 func _leave() -> void:
-	get_tree().change_scene_to_file("res://scenes/map/map.tscn")
+	Juice.fade_transition("res://scenes/map/map.tscn")

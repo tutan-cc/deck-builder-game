@@ -19,17 +19,33 @@ extends Node2D
 
 ## P38：敌人种类。视频里是 bat / crab 的组合，这里用同一个场景 + 不同贴图与系数
 const ENEMY_KINDS := {
-	"bat": {"art": "res://art/tile_0107.png", "hp": 0.75, "damage": 0.8},
-	"crab": {"art": "res://art/tile_0108.png", "hp": 1.15, "damage": 1.0},
+	"bat": {"art": "res://art/actors/actor_bat.png", "attack": "res://art/actors/actor_bat_att.png", "hp": 0.75, "damage": 0.8},
+	"crab": {"art": "res://art/actors/actor_crab.png", "attack": "res://art/actors/actor_crab_att.png", "hp": 1.15, "damage": 1.0},
 }
+
+const SLASH_FX := preload("res://art/fx/slash.png")
 
 var enemy_turn := false
 var battle_over := false
 var round_index := 1
 
+## 出牌震屏参数。抽成变量是为了能量化对比（tools/feel_lab.gd 会临时改它），
+## 也方便你在编辑器里直接调手感而不用改代码。
+@export var shake_amount := 2.0
+@export var shake_time := 0.12
+
 
 func _ready() -> void:
 	Shaker.register_target(self)
+	# pixelfx 是「第一次播才烘」，进战斗时先空烘一遍，别卡在第一次命中/第一次击杀
+	Juice.prewarm(self, ["explosions/cartoon-pow", "impacts/blunt-hit", "impacts/crit-hit", "spawn/poof",
+		"pickups/collect-burst", "ui/heart-lost"])
+	# 挂状态用的是 hit-spark + 三种调色板（紫=易伤、蓝=虚弱、橙=力量），
+	# palette 算进烘焙缓存 key，所以得一种一种预烘
+	for palette in ["shadow", "ice", "fire"]:
+		Juice.prewarm(self, ["impacts/hit-spark"], {"palette": palette})
+	# 格挡用的是 ice 调色板，缓存 key 里含 palette，所以得单独用同一套参数预烘
+	Juice.prewarm(self, ["impacts/parry"], {"palette": "ice"})
 
 	top_bar.end_turn_pressed.connect(end_turn)
 	pause_button.pressed.connect(_toggle_pause)
@@ -120,14 +136,26 @@ func _on_play_requested(card_ui: CardUI, targets: Array) -> void:
 		return
 	if not player.spend_energy(card_ui.card.cost):
 		# 别默默弹回去：告诉玩家为什么打不出去
-		Fx.pop_number(card_ui.global_position + card_ui.size * 0.5, card_ui.card.cost, Color(1.0, 0.45, 0.4), 1.2)
+		Juice.pop_number(card_ui.global_position + card_ui.size * 0.5, card_ui.card.cost, Color(1.0, 0.45, 0.4), 1.2)
 		_hint("能量不够")
 		card_ui.return_home()
 		return
 
+	var is_attack: bool = card_ui.card.type == Card.Type.ATTACK
 	card_ui.card.apply(targets, player.stats)
-	Sfx.play("slash" if card_ui.card.type == Card.Type.ATTACK else "block")
-	Shaker.shake(2.0, 0.12)
+	if is_attack:
+		# 玩家挥砍。目标的受击特效不在这里播——统一在 Enemy.take_damage 里，
+		# 这样烧血、荆棘反弹这些不是"这张牌打的"伤害也有命中反馈。
+		player.play_attack()
+		Juice.play_fx(player.global_position, SLASH_FX, 24, 18.0, {"offset": Vector2(11, 4), "scale": 1.35})
+		# 命中定格 60ms：特效本身只有三四帧，不冻一下根本看不清"打到了"
+		Juice.hit_stop(0.06)
+	Sfx.play("slash" if is_attack else "block")
+	Shaker.shake(shake_amount, shake_time)
+	# 卡牌被"用掉"也要有个交代：原地冒一下烟再消失，别凭空不见。
+	# 挂在 UI 层上——卡牌在 CanvasLayer 里，贴在 Battle 下面是会被手牌盖住的。
+	var card_pos := card_ui.global_position + card_ui.size * 0.5
+	Juice.play_pixel(Juice.layer, "spawn/poof", card_pos, {"scale": 0.55, "z": 90})
 	handler.discard(card_ui)
 	_refresh_affordability()
 	_update_piles()
@@ -168,6 +196,12 @@ func _win() -> void:
 		got_relic = relic.title
 
 	_update_piles()
+	# 胜利的那一下：先在玩家身上放一朵"收下战果"的星芒，0.45s 后再弹奖励面板，
+	# 不然面板盖上来，这一下等于没播
+	Juice.play_pixel(self, "pickups/collect-burst", player.global_position + Vector2(0, -10), {"z": 55})
+	await get_tree().create_timer(0.45).timeout
+	if not is_inside_tree():
+		return
 	rewards.closed.connect(_on_rewards_closed.bind(got_relic), CONNECT_ONE_SHOT)
 	rewards.open(RewardPool.draw(3), gold)
 
@@ -181,6 +215,8 @@ func _on_rewards_closed(got_relic := "") -> void:
 func _lose() -> void:
 	battle_over = true
 	top_bar.set_end_enabled(false)
+	# 被打倒：心碎一下再弹失败面板
+	Juice.play_pixel(self, "ui/heart-lost", player.global_position + Vector2(0, -10), {"z": 55})
 	over_panel.show_result(false, "第 %d 回合被打倒" % round_index)
 
 
@@ -241,7 +277,7 @@ func _current_deck() -> Array[Card]:
 ## 打赢了：回地图（P31 之后由地图决定下一个房间）
 func _go_next_room() -> void:
 	RunState.depth += 1
-	get_tree().change_scene_to_file("res://scenes/map/map.tscn")
+	Juice.fade_transition("res://scenes/map/map.tscn")
 
 
 func _spawn_encounter() -> void:
@@ -262,6 +298,8 @@ func _spawn_encounter() -> void:
 		var t := 0.0 if count == 1 else float(i) / float(count - 1)
 		enemy.position = Vector2(lerpf(150.0, 218.0, t), lerpf(56.0, 68.0, t))
 		$EnemyHandler.add_child(enemy)
+		# 敌人是"冒烟出现"的，不是凭空就在那儿（poof 已在 prewarm 里，零额外开销）
+		Juice.play_pixel($EnemyHandler, "spawn/poof", enemy.position, {"z": 20, "scale": 0.55})
 
 
 func _enemy_stats(display_name: String, kind := "crab") -> EnemyStats:
@@ -269,7 +307,10 @@ func _enemy_stats(display_name: String, kind := "crab") -> EnemyStats:
 	stats.display_name = display_name
 
 	# P37/P38：战斗随机化——越深越硬，且每场有浮动，不能靠背板通关
-	var depth_scale := 1.0 + 0.15 * maxf(0.0, RunState.depth - 1)
+	# 血和伤分开缩放：原来共用一个 0.15 斜率，深度 5 时伤害也吃 1.6 倍，
+	# 玩家 35 血两回合就没了 —— 数学上打不赢。
+	var hp_scale := 1.0 + 0.06 * maxf(0.0, RunState.depth - 1)
+	var dmg_scale := 1.0 + 0.05 * maxf(0.0, RunState.depth - 1)
 	# P34/P38：房间类型决定强敌倍率（精英 1.5×、Boss 2.4×）
 	var room_scale := 1.0
 	match RunState.current_room_type():
@@ -277,18 +318,22 @@ func _enemy_stats(display_name: String, kind := "crab") -> EnemyStats:
 			room_scale = 1.5
 		Room.Type.BOSS:
 			room_scale = 2.4
-	var scale := depth_scale * room_scale
+	# 叫 power 不叫 scale：Node2D 自己有 scale 属性，局部变量同名会报 SHADOWED_VARIABLE_BASE_CLASS
+	var hp_power := hp_scale * room_scale
+	var dmg_power := dmg_scale * room_scale
 
 	# P37：遭遇战自己的倍率（数量之外的强度差异）
 	var encounter := RunState.current_encounter
 	var hp_mult := encounter.hp_multiplier if encounter else 1.0
 	var dmg_mult := encounter.damage_multiplier if encounter else 1.0
 
-	var hp := int(round(18.0 * scale * hp_mult * randf_range(0.9, 1.1)))
+	var hp := int(round(15.0 * hp_power * hp_mult * randf_range(0.9, 1.1)))
 	# P38：种类差异（bat 脆、crab 硬），贴图也跟着换
 	var kind_data: Dictionary = ENEMY_KINDS.get(kind, ENEMY_KINDS["crab"])
 	hp = int(round(hp * float(kind_data["hp"])))
 	stats.art = load(kind_data["art"])
+	if kind_data.has("attack"):
+		stats.attack_art = load(kind_data["attack"])
 	dmg_mult *= float(kind_data["damage"])
 	stats.max_health = maxi(6, hp)
 	stats.health = stats.max_health
@@ -296,18 +341,18 @@ func _enemy_stats(display_name: String, kind := "crab") -> EnemyStats:
 	# P14：动作表 —— 普攻重、重击第 2 回合才可能出、格挡第 3 回合才可能出
 	var basic := EnemyAction.new()
 	basic.type = EnemyAction.Type.ATTACK
-	basic.value = maxi(2, int(round(6.0 * scale * dmg_mult * randf_range(0.9, 1.1))))
+	basic.value = maxi(2, int(round(6.0 * dmg_power * dmg_mult * randf_range(0.9, 1.1))))
 	basic.weight = 3.0
 
 	var heavy := EnemyAction.new()
 	heavy.type = EnemyAction.Type.ATTACK
-	heavy.value = maxi(3, int(round(9.0 * scale * dmg_mult)))
+	heavy.value = maxi(3, int(round(9.0 * dmg_power * dmg_mult)))
 	heavy.weight = 1.5
 	heavy.min_turn = 2
 
 	var guard := EnemyAction.new()
 	guard.type = EnemyAction.Type.BLOCK
-	guard.value = maxi(3, int(round(5.0 * scale * dmg_mult * 0.6)))
+	guard.value = maxi(3, int(round(5.0 * dmg_power * dmg_mult * 0.6)))
 	guard.weight = 1.0
 	guard.min_turn = 3
 
@@ -338,7 +383,7 @@ func _hint(text: String) -> void:
 	label.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.05))
 	label.add_theme_constant_override("outline_size", 3)
 	label.z_index = 130
-	Fx.layer.add_child(label)
+	Juice.layer.add_child(label)
 	label.position = Vector2(128 - label.get_minimum_size().x * 0.5, 96)
 	if not is_inside_tree():
 		return

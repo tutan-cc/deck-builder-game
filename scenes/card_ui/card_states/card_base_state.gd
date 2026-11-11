@@ -15,7 +15,7 @@ func enter() -> void:
 func on_gui_input(event: InputEvent) -> void:
 	if event.is_action_pressed("left_mouse"):
 		get_viewport().set_input_as_handled()
-		transition_requested.emit(self, State.CLICKED)
+		request(State.CLICKED)
 
 
 func on_mouse_entered() -> void:

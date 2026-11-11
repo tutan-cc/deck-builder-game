@@ -20,7 +20,7 @@ func exit() -> void:
 
 func _process(_delta: float) -> void:
 	if Input.is_action_just_released("left_mouse"):
-		transition_requested.emit(self, State.RELEASED)
+		request(State.RELEASED)
 		return
 	# 卡仍然跟着鼠标（和 dragging 一样），弧线由 selector 每帧重画
 	card_ui.global_position = card_ui.mouse_position() - card_ui.size * 0.5
