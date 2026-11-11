@@ -21,17 +21,26 @@ git add -A
 git -c http.sslBackend=openssl commit -m "%MSG%"
 if errorlevel 1 echo (nothing to commit, or commit failed - still trying to push)
 
+rem credential.username 必须给：本机存了 github.com 和 x-access-token@github.com 两条凭据，
+rem 不给的话 git-credential-manager 会弹"Select an account"对话框等人点。
+set CFG=-c http.sslBackend=openssl -c credential.username=tutan-cc
+rem 本机 github 走本地代理（Clash 127.0.0.1:7897）；代理没开时先试直连
+set PXO=-c http.proxy=http://127.0.0.1:7897
+
 echo.
 echo Pushing...
-set TRIES=0
-:retry
-git -c http.sslBackend=openssl push cardgame main
+set N=0
+:try
+git %CFG% push cardgame main
 if not errorlevel 1 goto ok
-set /a TRIES+=1
-if %TRIES% geq 3 goto fail
-echo Attempt %TRIES% failed (usually the local proxy dropping TLS). Retrying...
-timeout /t 2 >nul
-goto retry
+echo direct failed, retry via local proxy 127.0.0.1:7897 ...
+git %CFG% %PXO% push cardgame main
+if not errorlevel 1 goto ok
+set /a N+=1
+if %N% geq 3 goto fail
+echo Attempt %N% failed. Retrying in 3s...
+timeout /t 3 >nul
+goto try
 
 :ok
 echo.
@@ -42,7 +51,7 @@ exit /b 0
 :fail
 echo.
 echo Push failed 3 times. Common causes:
-echo   - github goes through a local proxy here, TLS handshake fails at random: just double-click again later
+echo   - local proxy (Clash) is not running: start Clash Verge and try again
 echo   - the stored token expired or lacks Contents: Read and write
 pause
 exit /b 1
