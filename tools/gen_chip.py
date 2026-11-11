@@ -97,32 +97,55 @@ def mix(*parts) -> np.ndarray:
 # ---------- 每个音效 ----------
 
 def s_slash() -> np.ndarray:
-    d = 0.34
-    whoosh = brighten(noise(d)) * env(d, 0.004, 6.0)
-    shing = square(sweep(1800.0, 260.0, d, 0.6), d, 0.25) * env(d, 0.001, 7.0)
-    return mix(whoosh * 0.9, shing * 0.45)
+    """挥砍：高频气流 + 下行的金属"锵"。
+
+    刻意不放低频闷响——那是格挡和受击的活儿。两个音当初听起来像，
+    就是因为 slash 里也有一个 1800→260 的扫频落在低频上。
+    """
+    d = 0.32
+    air = brighten(brighten(noise(d))) * env(d, 0.003, 5.0)
+    shing = mix(
+        square(sweep(2600.0, 700.0, d, 0.7), d, 0.25) * env(d, 0.001, 9.0),
+        triangle(sweep(3900.0, 1100.0, d, 0.6), d) * env(d, 0.001, 11.0),
+    )
+    return mix(air * 0.75, shing * 0.5)
 
 
 def s_block() -> np.ndarray:
-    d = 0.3
-    thud = square(140.0, d) * env(d, 0.001, 9.0)
-    ring = mix(
-        square(760.0, d, 0.25) * env(d, 0.001, 11.0),
-        square(1140.0, d, 0.25) * env(d, 0.001, 13.0),
-        square(1520.0, d, 0.5) * env(d, 0.001, 15.0),
+    """格挡：沉闷的金属闷响，几乎不含高频气流——和挥砍正好相反。
+
+    用 220/330/470Hz 三个不成谐波的方波叠出"盾牌被砸"的木质金属感，
+    再加一个 90Hz 的胸腔冲击。
+    """
+    d = 0.26
+    body = mix(
+        square(sweep(220.0, 150.0, d, 1.2), d, 0.5) * env(d, 0.001, 14.0),
+        square(330.0, d, 0.5) * env(d, 0.001, 18.0) * 0.6,
+        square(470.0, d, 0.25) * env(d, 0.001, 22.0) * 0.35,
     )
-    click = brighten(noise(0.05)) * env(0.05, 0.001, 12.0)
-    return mix(thud * 0.9, ring * 0.35, pad(click, d) * 0.5)
+    knock = square(90.0, d) * env(d, 0.001, 10.0) * 0.8
+    return mix(body, knock)
 
 
 def s_enemy_block() -> np.ndarray:
-    d = 0.3
-    thud = square(110.0, d) * env(d, 0.001, 8.0)
-    ring = mix(
-        square(520.0, d, 0.5) * env(d, 0.001, 12.0),
-        square(690.0, d, 0.25) * env(d, 0.001, 14.0),
+    """敌人格挡：比玩家的更闷更低，一听就知道是"对面"在挡。"""
+    d = 0.24
+    body = mix(
+        square(sweep(180.0, 120.0, d, 1.2), d, 0.5) * env(d, 0.001, 16.0),
+        square(250.0, d, 0.5) * env(d, 0.001, 20.0) * 0.5,
     )
-    return mix(thud * 1.0, ring * 0.28)
+    return mix(body, square(70.0, d) * env(d, 0.001, 12.0) * 0.7)
+
+
+def s_ui_click() -> np.ndarray:
+    """按钮点击：两声极短的高音滴答。
+
+    输出时单独压低 8dB（见 GAIN），不然在菜单里会比战斗音还抢耳朵。
+    """
+    p1 = square(1760.0, 0.02, 0.25) * env(0.02, 0.001, 6.0)
+    p2 = square(1320.0, 0.045, 0.25) * env(0.045, 0.001, 12.0)
+    return np.concatenate([p1, p2])
+
 
 
 def s_damage() -> np.ndarray:
@@ -195,19 +218,23 @@ BUILDERS = {
     "slash": s_slash, "block": s_block, "enemy_block": s_enemy_block, "damage": s_damage,
     "enemy_attack": s_enemy_attack, "enemy_die": s_enemy_die, "card_play": s_card_play,
     "coin": s_coin, "axe": s_axe, "victory": s_victory, "defeat": s_defeat,
+    "ui_click": s_ui_click,
 }
+
+# 每条单独的音量修正（dB）。UI 点击要明显低于战斗音，不然菜单里最吵的是它
+GAIN = {"ui_click": -8.0}
 
 
 # ---------- 输出 ----------
 
-def finish(x: np.ndarray, seconds: float) -> np.ndarray:
+def finish(x: np.ndarray, seconds: float, gain_db: float = 0.0) -> np.ndarray:
     out = pad(x, seconds)[: int(SR * seconds)].copy()
     fade = min(len(out), int(SR * min(0.03, seconds * 0.2)))
     if fade:
         out[-fade:] *= np.linspace(1.0, 0.0, fade) ** 1.5
     peak = float(np.max(np.abs(out)))
     if peak > 0:
-        out *= (10 ** (-1.5 / 20)) / peak
+        out *= (10 ** ((-1.5 + gain_db) / 20)) / peak
     return out
 
 
@@ -230,7 +257,7 @@ def main() -> int:
         return 2
     for name in names:
         raw = BUILDERS[name]()
-        out = finish(raw, len(raw) / SR)
+        out = finish(raw, len(raw) / SR, GAIN.get(name, 0.0))
         wav = os.path.join(WORK_DIR, f"{name}_chip.wav")
         write_wav(wav, out)
         dst = os.path.join(OUT_DIR, f"{name}.ogg")

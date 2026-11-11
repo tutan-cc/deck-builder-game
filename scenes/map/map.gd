@@ -169,6 +169,8 @@ func _on_room_input(event: InputEvent, index: int) -> void:
 		return
 	if not RunState.available_rooms().has(index):
 		return
+	# 房间不是 Button（自己画的金框 Control），拿不到 Sfx 的全局按键音，这里补一下
+	Sfx.play("ui_click")
 	await _enter(index)
 
 
